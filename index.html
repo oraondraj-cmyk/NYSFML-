@@ -4,34 +4,44 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>For Anshu ❤️</title>
-
 <style>
     body {
         margin: 0;
         padding: 0;
         height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+        overflow-x: hidden;
         font-family: 'Segoe UI', sans-serif;
-        text-align: center;
+        background: linear-gradient(135deg, #ff9a9e, #fad0c4);
         color: #fff;
     }
 
+    #fireworksCanvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        pointer-events: none;
+    }
+
     .card {
+        position: relative;
+        z-index: 2;
         background: rgba(255, 255, 255, 0.15);
         padding: 30px;
         border-radius: 20px;
         width: 90%;
-        max-width: 420px;
+        max-width: 500px;
         backdrop-filter: blur(10px);
         box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        text-align: center;
+        margin: 50px auto;
     }
 
     h1 {
         margin-bottom: 15px;
-        font-size: 26px;
+        font-size: 28px;
     }
 
     button {
@@ -51,40 +61,260 @@
 
     .message {
         margin-top: 20px;
-        font-size: 15px;
+        font-size: 16px;
         line-height: 1.6;
         display: none;
-        animation: fadeIn 1s ease forwards;
+        background: rgba(0,0,0,0.3);
+        padding: 15px;
+        border-radius: 15px;
+        min-height: 120px;
     }
 
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+    .photos {
+        display: none;
+        margin-top: 20px;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 10px;
+    }
+
+    .photos img {
+        height: 150px;
+        margin-right: 10px;
+        border-radius: 15px;
+        display: inline-block;
+    }
+
+    .hearts {
+        position: fixed;
+        top:0; left:0;
+        width:100%;
+        height:100%;
+        z-index: 1;
+        pointer-events:none;
+        overflow:hidden;
+    }
+
+    .heart {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background: red;
+        transform: rotate(45deg);
+        animation: floatUp linear infinite;
+    }
+
+    @keyframes floatUp {
+        0% { transform: translateY(0) rotate(45deg); opacity:1;}
+        100% { transform: translateY(-1000px) rotate(45deg); opacity:0;}
+    }
+
+    audio {
+        display: none;
     }
 </style>
 </head>
-
 <body>
+
+<canvas id="fireworksCanvas"></canvas>
+<div class="hearts" id="heartsContainer"></div>
 
 <div class="card">
     <h1>Happy New Year, Anshu ❤️</h1>
+    <button onclick="startMagic()">Click Here</button>
 
-    <button onclick="showMessage()">Click Here</button>
+    <div class="message" id="message"></div>
 
-    <div class="message" id="message">
-        <p>
-            You mean more to me than I ever say out loud.<br><br>
-            In all the noise, confusion, and silence, you are still the one my heart looks for.<br><br>
-            Being with you feels like home, and no matter what comes our way,
-            my choice remains the same — <b>you</b>.
-        </p>
+    <div class="photos" id="photos">
+        <img src="photo1.jpg" alt="Photo 1">
+        <img src="photo2.jpg" alt="Photo 2">
+        <img src="photo3.jpg" alt="Photo 3">
+        <img src="photo4.jpg" alt="Photo 4">
+        <img src="photo5.jpg" alt="Photo 5">
+        <img src="photo6.jpg" alt="Photo 6">
+        <img src="photo7.jpg" alt="Photo 7">
+        <img src="photo8.jpg" alt="Photo 8">
+        <img src="photo9.jpg" alt="Photo 9">
     </div>
+
+    <audio id="bgMusic" src="yourmusic.mp3" loop></audio>
 </div>
 
 <script>
-    function showMessage() {
-        document.getElementById("message").style.display = "block";
+const paragraph = `Anshu, you are the most beautiful part of my life, the reason my heart smiles every day. 
+Through every laugh, every tear, every little moment, I realize how much you mean to me. 
+No matter the distance, no matter the challenges, my feelings for you remain unwavering. 
+Being with you feels like home, a place where I am understood, loved, and cherished. 
+Every second with you is a treasure I hold close to my heart. 
+You inspire me to be a better version of myself, and I promise that no matter what happens, 
+I will always choose you, love you, and stand by you. 
+Happy New Year, my love! ❤️`;
+
+function typeWriter(element, text, delay = 80, callback=null) {
+    let i = 0;
+    element.style.display = 'block';
+    element.innerHTML = '';
+    function typing() {
+        if(i < text.length) {
+            element.innerHTML += text.charAt(i) === '\n' ? '<br>' : text.charAt(i);
+            i++;
+            setTimeout(typing, delay);
+        } else if(callback) callback();
     }
+    typing();
+}
+
+// Music play
+function startMusic() {
+    const music = document.getElementById('bgMusic');
+    music.volume = 0.5;
+    const playPromise = music.play();
+    if (playPromise !== undefined) {
+        playPromise.then(_ => {
+            console.log("Music started");
+        }).catch(error => {
+            console.log("Autoplay blocked, user must interact", error);
+            alert("Tap anywhere to play music");
+        });
+    }
+}
+
+// Hearts
+function createHearts() {
+    const container = document.getElementById('heartsContainer');
+    for(let i=0;i<30;i++){
+        const heart = document.createElement('div');
+        heart.className = 'heart';
+        heart.style.left = Math.random()*100+'%';
+        heart.style.animationDuration = 5 + Math.random()*5+'s';
+        heart.style.width = 10 + Math.random()*15+'px';
+        heart.style.height = 10 + Math.random()*15+'px';
+        container.appendChild(heart);
+    }
+}
+
+// Fireworks
+function startFireworks() {
+    const canvas = document.getElementById('fireworksCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const fireworks = [];
+    const particles = [];
+
+    function random(min,max){return Math.random()*(max-min)+min;}
+    function Firework(sx,sy,tx,ty){
+        this.x = sx; this.y = sy; this.sx=sx; this.sy=sy; this.tx=tx; this.ty=ty;
+        this.distance = Math.hypot(tx-sx,ty-sy);
+        this.distanceTraveled=0;
+        this.coordinates = [];
+        this.coordinateCount=3;
+        while(this.coordinateCount--) this.coordinates.push([this.x,this.y]);
+        this.angle = Math.atan2(ty-sy,tx-sx);
+        this.speed = 2;
+        this.acceleration = 1.05;
+        this.brightness = random(50,70);
+        this.targetRadius = 1;
+    }
+    Firework.prototype.update = function(idx){
+        this.coordinates.pop();
+        this.coordinates.unshift([this.x,this.y]);
+        if(this.targetRadius < 8){ this.targetRadius +=0.3; } else { this.targetRadius =1; }
+        this.speed *= this.acceleration;
+        let vx = Math.cos(this.angle)*this.speed;
+        let vy = Math.sin(this.angle)*this.speed;
+        this.distanceTraveled = Math.hypot(this.x+vx-this.sx,this.y+vy-this.sy);
+        if(this.distanceTraveled >= this.distance){
+            createParticles(this.tx,this.ty);
+            fireworks.splice(idx,1);
+        } else {
+            this.x += vx;
+            this.y += vy;
+        }
+    }
+    Firework.prototype.draw = function(){
+        ctx.beginPath();
+        ctx.moveTo(this.coordinates[this.coordinates.length-1][0],this.coordinates[this.coordinates.length-1][1]);
+        ctx.lineTo(this.x,this.y);
+        ctx.strokeStyle = 'hsl('+random(0,360)+',100%,'+this.brightness+'%)';
+        ctx.stroke();
+    }
+
+    function Particle(x,y){
+        this.x=x; this.y=y;
+        this.coordinates = [];
+        this.coordinateCount=5;
+        while(this.coordinateCount--) this.coordinates.push([this.x,this.y]);
+        this.angle = random(0,Math.PI*2);
+        this.speed = random(1,10);
+        this.friction = 0.95;
+        this.gravity = 0.7;
+        this.hue = random(0,360);
+        this.brightness = random(50,80);
+        this.alpha = 1;
+        this.decay = random(0.015,0.03);
+    }
+    Particle.prototype.update = function(idx){
+        this.coordinates.pop();
+        this.coordinates.unshift([this.x,this.y]);
+        this.speed *= this.friction;
+        this.x += Math.cos(this.angle)*this.speed;
+        this.y += Math.sin(this.angle)*this.speed + this.gravity;
+        this.alpha -= this.decay;
+        if(this.alpha<=this.decay){ particles.splice(idx,1); }
+    }
+    Particle.prototype.draw = function(){
+        ctx.beginPath();
+        ctx.moveTo(this.coordinates[this.coordinates.length-1][0],this.coordinates[this.coordinates.length-1][1]);
+        ctx.lineTo(this.x,this.y);
+        ctx.strokeStyle = 'hsla('+this.hue+',100%,'+this.brightness+'%,'+this.alpha+')';
+        ctx.stroke();
+    }
+
+    function createParticles(x,y){
+        let particleCount = 30;
+        while(particleCount--){
+            particles.push(new Particle(x,y));
+        }
+    }
+
+    function loop(){
+        requestAnimationFrame(loop);
+        ctx.globalCompositeOperation='destination-out';
+        ctx.fillStyle='rgba(0,0,0,0.3)';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.globalCompositeOperation='lighter';
+        let i=fireworks.length;
+        while(i--){
+            fireworks[i].draw();
+            fireworks[i].update(i);
+        }
+        i=particles.length;
+        while(i--){
+            particles[i].draw();
+            particles[i].update(i);
+        }
+    }
+
+    setInterval(()=>{ 
+        fireworks.push(new Firework(canvas.width/2, canvas.height, Math.random()*canvas.width, Math.random()*canvas.height/2));
+    }, 500);
+
+    loop();
+}
+
+// Main function
+function startMagic() {
+    startMusic();
+    createHearts();
+    startFireworks();
+
+    const msg = document.getElementById('message');
+    typeWriter(msg, paragraph, 80, ()=> {   // slower typewriter
+        document.getElementById('photos').style.display='block';
+    });
+}
 </script>
 
 </body>
