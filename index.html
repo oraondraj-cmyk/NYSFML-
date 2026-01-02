@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Year Scrapbook ❤️</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Segoe UI',sans-serif;
+  height:100vh;
+  overflow:hidden;
+  background:#f3e9dc;
+  perspective:1200px;
+}
+
+/* Translucent overlay */
+.overlay{
+  position:absolute;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(255,255,255,0.25);
+  backdrop-filter:blur(12px);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  z-index:1;
+}
+
+/* Pages */
+.page{
+  display:none;
+  width:100%;
+  height:100%;
+  padding:20px;
+  text-align:center;
+  transform-style:preserve-3d;
+  z-index:2;
+}
+.page.active{display:block;}
+button{
+  margin-top:20px;
+  padding:12px 28px;
+  border:none;
+  border-radius:30px;
+  background:#c0392b;
+  color:#fff;
+  font-size:16px;
+  cursor:pointer;
+  z-index:3;
+}
+
+/* Envelope */
+.envelope{
+  width:260px; height:160px;
+  background:#d35400;
+  border-radius:10px;
+  position:relative;
+  transform:translateZ(100px);
+  box-shadow:0 30px 50px rgba(0,0,0,0.4);
+  transition:transform 0.8s ease;
+  cursor:pointer;
+  margin:100px auto;
+}
+.envelope::before{
+  content:'';
+  position:absolute;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:#e67e22;
+  clip-path: polygon(0 0,50% 60%,100% 0,100% 100%,0 100%);
+}
+
+/* Letter peek/full */
+.letter{
+  background:#fff8e1;
+  color:#333;
+  padding:30px;
+  border-radius:12px;
+  max-width:550px;
+  margin:50px auto;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+  transform:translateZ(0) scale(0.8);
+  transition:transform 0.6s ease, opacity 0.6s ease;
+  opacity:0.8;
+  cursor:pointer;
+  display:block;
+  text-align:left;
+  line-height:1.6;
+}
+.letter.full{
+  transform:translateZ(150px) scale(1.1);
+  opacity:1;
+}
+
+/* Scrapbook */
+.scrapbook{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:20px;
+  margin-top:40px;
+}
+.scrapbook img{
+  width:140px; height:180px;
+  object-fit:cover;
+  background:white;
+  padding:8px;
+  box-shadow:0 10px 20px rgba(0,0,0,.3);
+  transform: translateX(-200px);
+  opacity:0;
+  transition: transform 0.8s ease, opacity 0.8s ease;
+}
+.scrap-show{
+  transform: translateX(0);
+  opacity:1;
+}
+
+/* End page */
+.end{
+  margin-top:140px;
+  font-size:28px;
+  color:#c0392b;
+  transform:translateZ(80px);
+}
+
+/* Fireworks canvas */
+#fireworksCanvas{
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  z-index:10;
+  pointer-events:none;
+}
+
+/* Hearts/confetti */
+.heart{
+  position:absolute;
+  width:12px;
+  height:12px;
+  background:red;
+  transform:rotate(45deg);
+  animation:floatUp linear infinite;
+  pointer-events:none;
+  border-radius:2px;
+}
+@keyframes floatUp{
+  0% {transform:translateY(0) rotate(45deg); opacity:1;}
+  100% {transform:translateY(-1000px) rotate(45deg); opacity:0;}
+}
+</style>
+</head>
+<body>
+
+<div class="overlay">
+
+  <!-- PAGE 1: Envelope -->
+  <div class="page active">
+    <div class="envelope" id="envelope"></div>
+    <h2 style="margin-top:20px;">For you my love ❤️</h2>
+    <button onclick="nextPage()">Open</button>
+  </div>
+
+  <!-- PAGE 2: Letter peek/full -->
+  <div class="page">
+    <div class="letter" id="letterPeek">
+      <h2>My Love ❤️</h2>
+      <p id="letterText">Tap me to see the full letter!</p>
+    </div>
+    <button onclick="nextPage()">Turn the page →</button>
+  </div>
+
+  <!-- PAGE 3: Scrapbook 1 -->
+  <div class="page">
+    <h2>Our Memories 📸</h2>
+    <div class="scrapbook" id="scrap1">
+      <img src="photo1.jpg">
+      <img src="photo2.jpg">
+      <img src="photo3.jpg">
+      <img src="photo4.jpg">
+    </div>
+    <button onclick="nextPage()">Turn the page →</button>
+  </div>
+
+  <!-- PAGE 4: Scrapbook 2 -->
+  <div class="page">
+    <h2>More Us ❤️</h2>
+    <div class="scrapbook" id="scrap2">
+      <img src="photo5.jpg">
+      <img src="photo6.jpg">
+      <img src="photo7.jpg">
+      <img src="photo8.jpg">
+    </div>
+    <button onclick="nextPage()">Turn the page →</button>
+  </div>
+
+  <!-- PAGE 5: New Year End -->
+  <div class="page">
+    <div class="end" id="endMsg">Happy New Year<br>My Love ❤️</div>
+    <button onclick="celebrate()">Celebrate 🎉</button>
+  </div>
+
+</div>
+
+<!-- Fireworks -->
+<canvas id="fireworksCanvas"></canvas>
+<!-- Music -->
+<audio id="music" src="music.mp3"></audio>
+
+<script>
+// Page turn logic
+let page=0;
+const pages=document.querySelectorAll('.page');
+function nextPage(){
+  pages[page].classList.remove('active');
+  page++;
+  if(page<pages.length){
+    pages[page].classList.add('active');
+    if(page===2) showScrap('scrap1');
+    if(page===3) showScrap('scrap2');
+  }
+}
+
+// Letter peek → full letter with typewriter
+const letterPeek=document.getElementById('letterPeek');
+const letterText=document.getElementById('letterText');
+letterPeek.addEventListener('click', ()=>{
+  letterPeek.classList.add('full');
+  const text = `
+As the previous year ends and a new one begins ( ik im bit late...really sorry ), I just want to take a moment to tell you how much you mean to me. Every moment with you — the laughs, the talks, even the little misunderstandings — has made me realize how deeply I care for you.
+
+I don’t want the New Year to be just another page on the calendar. I want it to be a fresh start for us, filled with patience, understanding, and endless love. I promise to listen, to support you, and to love you selflessly, every single day.
+
+Thank you for being the reason my heart feels so full. I hope this year brings us closer, makes us stronger, and fills our lives with happiness we both deserve.
+
+Always yours
+ Raj 😊
+  `;
+  typeWriter(letterText,text,30);
+});
+
+function typeWriter(el, text, speed){
+  let i=0;
+  el.innerHTML='';
+  function typing(){
+    if(i<text.length){
+      el.innerHTML += text.charAt(i)==='\n'? '<br>': text.charAt(i);
+      i++;
+      setTimeout(typing,speed);
+    }
+  }
+  typing();
+}
+
+// Scrapbook photo slide-in
+function showScrap(id){
+  const imgs = document.getElementById(id).querySelectorAll('img');
+  imgs.forEach((img,i)=>{
+    setTimeout(()=>{ img.classList.add('scrap-show'); }, i*300);
+  });
+}
+
+// Fireworks
+function startFireworks(){
+  const canvas=document.getElementById('fireworksCanvas');
+  const ctx=canvas.getContext('2d');
+  canvas.width=window.innerWidth;
+  canvas.height=window.innerHeight;
+
+  const particles=[];
+  function Particle(x,y,hue){
+    this.x=x; this.y=y; this.hue=hue;
+    this.size=2; this.speed=Math.random()*5+2;
+    this.angle=Math.random()*Math.PI*2; this.alpha=1;
+  }
+  Particle.prototype.update=function(){
+    this.x+=Math.cos(this.angle)*this.speed;
+    this.y+=Math.sin(this.angle)*this.speed;
+    this.alpha-=0.02;
+  }
+  Particle.prototype.draw=function(){
+    ctx.fillStyle=`hsla(${this.hue},100%,50%,${this.alpha})`;
+    ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill();
+  }
+  function loop(){
+    ctx.fillStyle='rgba(0,0,0,0.2)';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    particles.forEach((p,i)=>{
+      p.update(); p.draw();
+      if(p.alpha<=0) particles.splice(i,1);
+    });
+    requestAnimationFrame(loop);
+  }
+  setInterval(()=>{
+    const x=Math.random()*canvas.width;
+    const y=Math.random()*canvas.height/2;
+    for(let i=0;i<30;i++){
+      particles.push(new Particle(x,y,Math.random()*360));
+    }
+  },400);
+  loop();
+}
+
+// Hearts/confetti
+function createHearts(){
+  for(let i=0;i<25;i++){
+    const h=document.createElement('div');
+    h.className='heart';
+    h.style.left=Math.random()*100+'%';
+    h.style.animationDuration=(5+Math.random()*5)+'s';
+    h.style.width=8+Math.random()*10+'px';
+    h.style.height=8+Math.random()*10+'px';
+    document.body.appendChild(h);
+  }
+}
+
+// Celebrate last page → music + fireworks + hearts
+function celebrate(){
+  startFireworks();
+  createHearts();
+  const audio=document.getElementById('music');
+  audio.play().catch(()=>{});
+  document.getElementById('endMsg').style.transform='translateZ(120px) scale(1.3)';
+}
+</script>
+</body>
+</html>
